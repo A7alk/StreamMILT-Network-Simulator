@@ -1,3 +1,4 @@
+
 import scapy.all as scapy
 import json
 import streamlit as st
@@ -41,13 +42,16 @@ class NetworkSimulator:
         st.pyplot(plt)
 
     def extract_hosts_from_scenario(self, scenario_text):
-        """Extracts host names from the scenario description, handling different cases and formats."""
-        hosts = re.findall(r'(?i)host [A-Z]', scenario_text)  # Case insensitive match
-        unique_hosts = list(set(hosts))  # Remove duplicates
+        """Extracts host names from the scenario description using a more robust method."""
+        hosts = re.findall(r'(?i)host\s*([A-Z])', scenario_text)  # Capture letters after "Host"
+        unique_hosts = list(set([f"Host {h.upper()}" for h in hosts]))  # Standardize format
         
         if len(unique_hosts) < 2:
-            st.warning("Not enough hosts detected. Using default values: Host A and Host B.")
-            return ["Host A", "Host B"]  # Fallback default hosts if not enough are found
+            st.warning("Not enough hosts detected. Using inferred values.")
+            if len(unique_hosts) == 1:
+                unique_hosts.append("Host B" if unique_hosts[0] != "Host B" else "Host A")  # Infer second host
+            else:
+                unique_hosts = ["Host A", "Host B"]  # Fallback
         
         return unique_hosts
 
@@ -136,4 +140,3 @@ if st.button("Execute Attack", key="execute_attack"):
 if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
     st.write("### ARP Packet Contents")
     st.table(st.session_state["arp_packet"])
-
