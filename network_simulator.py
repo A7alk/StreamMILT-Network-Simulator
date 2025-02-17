@@ -1,7 +1,7 @@
 import scapy.all as scapy
 import json
 import streamlit as st
-import cv2
+from PIL import Image
 import easyocr
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -30,9 +30,8 @@ class NetworkSimulator:
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
-        image = cv2.imread(image_path)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        result = self.reader.readtext(gray)
+        image = Image.open(image_path).convert('L')  # Convert image to grayscale
+        result = self.reader.readtext(image)
         
         devices = [text[1] for text in result]
         self.network = {device: {"IP": device, "MAC": device} for device in devices}  # IP and MAC set as hostname
@@ -104,3 +103,4 @@ if st.button("Analyze with GPT", key="analyze_gpt"):
 if st.session_state["analysis_result"]:
     st.write("### AI Analysis Result")
     st.write(st.session_state["analysis_result"])
+
