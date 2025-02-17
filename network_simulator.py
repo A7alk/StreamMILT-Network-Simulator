@@ -1,4 +1,3 @@
-
 import scapy.all as scapy
 import json
 import streamlit as st
@@ -28,7 +27,7 @@ class NetworkSimulator:
         result = self.reader.readtext(gray)
         
         devices = [text[1] for text in result]
-        self.network = {device: {"IP": f"192.168.1.{i+1}", "MAC": f"AA:BB:CC:DD:EE:{i+1:02d}"} for i, device in enumerate(devices)}
+        self.network = {device: {"IP": device, "MAC": device} for device in devices}  # IP and MAC set as hostname
         return self.network
 
     def draw_network(self):
@@ -43,7 +42,7 @@ class NetworkSimulator:
 
     def extract_hosts_from_scenario(self, scenario_text):
         """Extracts host names from the scenario description using a more robust method."""
-        hosts = re.findall(r'(?i)host\s*([A-Z])', scenario_text)  # Capture letters after "Host"
+        hosts = re.findall(r'(?i)host\s*([A-Z0-9]+)', scenario_text)  # Capture host names dynamically
         unique_hosts = list(set([f"Host {h.upper()}" for h in hosts]))  # Standardize format
         
         if len(unique_hosts) < 2:
@@ -63,8 +62,10 @@ class NetworkSimulator:
         destination_host = hosts[1]
         
         arp_packet_data = [
-            ["ARP Request", f"192.168.1.{ord(source_host[-1]) - 64}", f"AA:BB:CC:DD:EE:{ord(source_host[-1]) - 64:02d}",
-             f"192.168.1.{ord(destination_host[-1]) - 64}", f"FF:FF:FF:FF:FF:FF"],
+            ["ARP Request", self.network.get(source_host, {}).get("IP", source_host),
+             self.network.get(source_host, {}).get("MAC", source_host),
+             self.network.get(destination_host, {}).get("IP", destination_host),
+             self.network.get(destination_host, {}).get("MAC", destination_host)],
             ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
         ]
         st.session_state["arp_packet"] = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
