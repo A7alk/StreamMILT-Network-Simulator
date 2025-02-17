@@ -34,16 +34,13 @@ class NetworkSimulator:
         st.pyplot(plt)
 
     def generate_arp_packet(self):
-        """Generates and displays an ARP request packet in table format."""
+        """Generates and stores an ARP request packet in session state."""
         arp_packet_data = [
             ["ARP Request", "192.168.1.5", "AA:BB:CC:DD:EE:05", "192.168.1.2", "FF:FF:FF:FF:FF:FF"],
             ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
         ]
-        arp_packet_df = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
-        
-        st.write("### ARP Packet Contents")
-        st.table(arp_packet_df)
-        
+        st.session_state["arp_packet"] = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
+    
     def execute_attack(self, scenario_text):
         """Executes the selected attack type on the extracted network."""
         if not self.attack_type:
@@ -65,6 +62,11 @@ class NetworkSimulator:
         st.write(f"### Scenario: {scenario_text}")
         if st.button("Generate ARP Packet Contents"):
             self.generate_arp_packet()
+        
+        if "arp_packet" in st.session_state:
+            st.write("### ARP Packet Contents")
+            st.table(st.session_state["arp_packet"])
+        
         st.success("[+] Man-in-the-Middle attack completed.")
     
     def dos_attack(self):
