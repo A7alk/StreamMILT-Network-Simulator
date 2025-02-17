@@ -1,6 +1,5 @@
 import scapy.all as scapy
 import json
-import streamlit as st
 from PIL import Image
 import numpy as np
 import networkx as nx
@@ -8,6 +7,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import re
 import openai
+import streamlit as st
+
+# Load API key securely from Streamlit secrets
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
 
 # Initialize session state if it doesn't exist
 if "arp_packet" not in st.session_state:
