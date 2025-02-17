@@ -6,6 +6,7 @@ import easyocr
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
+import re
 
 # Initialize session state if it doesn't exist
 if "arp_packet" not in st.session_state:
@@ -39,10 +40,24 @@ class NetworkSimulator:
         nx.draw(G, with_labels=True, node_color='lightblue', edge_color='gray', node_size=3000, font_size=10)
         st.pyplot(plt)
 
-    def generate_arp_packet(self):
-        """Generates and stores an ARP request packet in session state."""
+    def extract_hosts_from_scenario(self, scenario_text):
+        """Extracts host names from the scenario description."""
+        hosts = re.findall(r'Host [A-Z]', scenario_text)
+        return list(set(hosts))
+
+    def generate_arp_packet(self, scenario_text):
+        """Generates an ARP packet dynamically based on the attack scenario."""
+        hosts = self.extract_hosts_from_scenario(scenario_text)
+        if len(hosts) < 2:
+            st.error("Unable to extract enough hosts from the scenario.")
+            return
+        
+        source_host = hosts[0]
+        destination_host = hosts[1]
+        
         arp_packet_data = [
-            ["ARP Request", "192.168.1.5", "AA:BB:CC:DD:EE:05", "192.168.1.2", "FF:FF:FF:FF:FF:FF"],
+            ["ARP Request", f"192.168.1.{ord(source_host[-1]) - 64}", f"AA:BB:CC:DD:EE:{ord(source_host[-1]) - 64:02d}",
+             f"192.168.1.{ord(destination_host[-1]) - 64}", f"FF:FF:FF:FF:FF:FF"],
             ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
         ]
         st.session_state["arp_packet"] = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
@@ -69,7 +84,7 @@ class NetworkSimulator:
         """Simulates a Man-in-the-Middle attack and allows ARP packet generation."""
         st.write(f"### Scenario: {scenario_text}")
         if st.button("Generate ARP Packet Contents", key="generate_arp"):
-            self.generate_arp_packet()
+            self.generate_arp_packet(scenario_text)
         
         if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
             st.write("### ARP Packet Contents")
@@ -119,6 +134,7 @@ if st.button("Execute Attack", key="execute_attack"):
 if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
     st.write("### ARP Packet Contents")
     st.table(st.session_state["arp_packet"])
+
 
 
 
