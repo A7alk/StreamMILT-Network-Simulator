@@ -33,6 +33,17 @@ class NetworkSimulator:
         nx.draw(G, with_labels=True, node_color='lightblue', edge_color='gray', node_size=3000, font_size=10)
         st.pyplot(plt)
 
+    def generate_arp_packet(self):
+        """Generates and displays an ARP request packet in table format."""
+        arp_packet_data = [
+            ["ARP Request", "192.168.1.5", "AA:BB:CC:DD:EE:05", "192.168.1.2", "FF:FF:FF:FF:FF:FF"],
+            ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
+        ]
+        arp_packet_df = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
+        
+        st.write("### ARP Packet Contents")
+        st.table(arp_packet_df)
+        
     def execute_attack(self, scenario_text):
         """Executes the selected attack type on the extracted network."""
         if not self.attack_type:
@@ -50,18 +61,10 @@ class NetworkSimulator:
             st.error("Invalid attack type selected.")
     
     def mitm_attack(self, scenario_text):
-        """Simulates a Man-in-the-Middle attack and generates ARP packet content."""
-        st.write(f"[+] Scenario: {scenario_text}")
-        
+        """Simulates a Man-in-the-Middle attack and allows ARP packet generation."""
+        st.write(f"### Scenario: {scenario_text}")
         if st.button("Generate ARP Packet Contents"):
-            arp_packet_data = [
-                ["ARP Request", "192.168.1.5", "AA:BB:CC:DD:EE:05", "192.168.1.2", "FF:FF:FF:FF:FF:FF"],
-                ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
-            ]
-            arp_packet_df = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
-            
-            st.table(arp_packet_df)
-        
+            self.generate_arp_packet()
         st.success("[+] Man-in-the-Middle attack completed.")
     
     def dos_attack(self):
@@ -101,4 +104,5 @@ scenario_text = st.text_area("Describe the attack scenario:", "Host E uses the M
 # Execute Attack
 if st.button("Execute Attack"):
     simulator.execute_attack(scenario_text)
+
 
