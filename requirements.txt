@@ -6,5 +6,5 @@ easyocr
 networkx
 matplotlib
 panda
-opencv-python-headless
+
 
