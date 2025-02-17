@@ -1,9 +1,6 @@
 streamlit
 scapy
 opencv-python-headless
-pytesseract==0.3.13
+easyocr
 networkx
 matplotlib
-requests
-pillow
-numpy
