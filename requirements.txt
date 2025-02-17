@@ -1,7 +1,8 @@
 streamlit
+openai
 scapy
-opencv-python-headless
+opencv-python
 easyocr
 networkx
 matplotlib
-openai
+pandas
