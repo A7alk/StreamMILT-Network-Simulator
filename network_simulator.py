@@ -21,7 +21,7 @@ if "analysis_result" not in st.session_state:
 
 # OpenAI API Key (Replace with your actual API key)
 OPENAI_API_KEY = "your-api-key-here"
-openai.api_key = OPENAI_API_KEY
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 class NetworkSimulator:
     def __init__(self):
@@ -64,12 +64,12 @@ class NetworkSimulator:
         """
         
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "system", "content": "You are a network security expert."},
                           {"role": "user", "content": prompt}]
             )
-            analysis = response["choices"][0]["message"]["content"]
+            analysis = response.choices[0].message.content
         except Exception as e:
             analysis = f"Error in AI analysis: {str(e)}"
         
