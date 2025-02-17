@@ -2,7 +2,7 @@ import scapy.all as scapy
 import json
 import streamlit as st
 from PIL import Image
-import easyocr
+import pytesseract
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,14 +26,14 @@ openai.api_key = OPENAI_API_KEY
 class NetworkSimulator:
     def __init__(self):
         self.network = {}
-        self.reader = easyocr.Reader(['en'])
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
         image = Image.open(image_path).convert('L')  # Convert image to grayscale
-        result = self.reader.readtext(image)
+        extracted_text = pytesseract.image_to_string(image)
         
-        devices = [text[1] for text in result]
+        devices = extracted_text.split('\n')  # Split detected text into lines
+        devices = [device.strip() for device in devices if device.strip()]  # Clean up empty lines
         self.network = {device: {"IP": device, "MAC": device} for device in devices}  # IP and MAC set as hostname
         st.session_state["network_analyzed"] = True
         return self.network
