@@ -7,13 +7,17 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Initialize session state if it doesn't exist
+if "arp_packet" not in st.session_state:
+    st.session_state["arp_packet"] = None
+if "show_arp_packet" not in st.session_state:
+    st.session_state["show_arp_packet"] = False
+
 class NetworkSimulator:
-    def __init__(self): 
+    def __init__(self):
         self.network = {}
         self.attack_type = None
         self.reader = easyocr.Reader(['en'])
-        if "arp_packet" not in st.session_state:
-            st.session_state["arp_packet"] = None
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
@@ -42,6 +46,7 @@ class NetworkSimulator:
             ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
         ]
         st.session_state["arp_packet"] = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
+        st.session_state["show_arp_packet"] = True
     
     def execute_attack(self, scenario_text):
         """Executes the selected attack type on the extracted network."""
@@ -64,9 +69,8 @@ class NetworkSimulator:
         st.write(f"### Scenario: {scenario_text}")
         if st.button("Generate ARP Packet Contents", key="generate_arp"):
             self.generate_arp_packet()
-            st.session_state["show_arp_packet"] = True
         
-        if st.session_state.get("show_arp_packet", False) and st.session_state["arp_packet"] is not None:
+        if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
             st.write("### ARP Packet Contents")
             st.table(st.session_state["arp_packet"])
         
@@ -110,6 +114,9 @@ scenario_text = st.text_area("Describe the attack scenario:", "Host E uses the M
 if st.button("Execute Attack", key="execute_attack"):
     simulator.execute_attack(scenario_text)
 
-
+# Ensure ARP Packet Table Stays Visible
+if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
+    st.write("### ARP Packet Contents")
+    st.table(st.session_state["arp_packet"])
 
 
