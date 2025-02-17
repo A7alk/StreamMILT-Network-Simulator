@@ -32,7 +32,7 @@ class NetworkSimulator:
         nx.draw(G, with_labels=True, node_color='lightblue', edge_color='gray', node_size=3000, font_size=10)
         st.pyplot(plt)
 
-    def execute_attack(self):
+    def execute_attack(self, scenario_text):
         """Executes the selected attack type on the extracted network."""
         if not self.attack_type:
             st.error("Please select an attack type.")
@@ -40,7 +40,7 @@ class NetworkSimulator:
         
         st.success(f"Executing {self.attack_type} attack on the network...")
         if self.attack_type == "Man-in-the-Middle (MiM)":
-            self.mitm_attack()
+            self.mitm_attack(scenario_text)
         elif self.attack_type == "Denial of Service (DoS)":
             self.dos_attack()
         elif self.attack_type == "ARP Poisoning":
@@ -48,10 +48,20 @@ class NetworkSimulator:
         else:
             st.error("Invalid attack type selected.")
     
-    def mitm_attack(self):
-        """Simulates a Man-in-the-Middle attack."""
-        st.write("[+] Performing Man-in-the-Middle attack...")
-        # Add MITM logic here
+    def mitm_attack(self, scenario_text):
+        """Simulates a Man-in-the-Middle attack and generates ARP packet content."""
+        st.write(f"[+] Scenario: {scenario_text}")
+        
+        if st.button("Generate ARP Packet Contents"):
+            arp_packet = {
+                "ARP Operation": "Request",
+                "Source IP": "192.168.1.5",  # Assuming Host E
+                "Source MAC": "AA:BB:CC:DD:EE:05",
+                "Destination IP": "192.168.1.2",  # Assuming Host A
+                "Destination MAC": "FF:FF:FF:FF:FF:FF"
+            }
+            st.json(arp_packet)
+        
         st.success("[+] Man-in-the-Middle attack completed.")
     
     def dos_attack(self):
@@ -87,6 +97,10 @@ if st.button("Draw Network"):
 attack_type = st.selectbox("Select Attack Type:", ["Man-in-the-Middle (MiM)", "Denial of Service (DoS)", "ARP Poisoning"])
 simulator.attack_type = attack_type
 
+# Scenario Input
+scenario_text = st.text_area("Describe the attack scenario:", "Host E uses the Man-in-the-Middle (MiM) attack to sniff the traffic between the hosts A and D. To do that, the malicious user needs to send fake ARP request packets.")
+
 # Execute Attack
 if st.button("Execute Attack"):
-    simulator.execute_attack()
+    simulator.execute_attack(scenario_text)
+
