@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 class NetworkSimulator:
-    def __init__(self):
+    def __init__(self): 
         self.network = {}
         self.attack_type = None
         self.reader = easyocr.Reader(['en'])
