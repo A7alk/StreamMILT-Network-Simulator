@@ -47,6 +47,7 @@ class NetworkSimulator:
         ]
         st.session_state["arp_packet"] = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
         st.session_state["show_arp_packet"] = True
+        st.rerun()
     
     def execute_attack(self, scenario_text):
         """Executes the selected attack type on the extracted network."""
@@ -118,5 +119,6 @@ if st.button("Execute Attack", key="execute_attack"):
 if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
     st.write("### ARP Packet Contents")
     st.table(st.session_state["arp_packet"])
+
 
 
