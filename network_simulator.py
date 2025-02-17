@@ -41,16 +41,19 @@ class NetworkSimulator:
         st.pyplot(plt)
 
     def extract_hosts_from_scenario(self, scenario_text):
-        """Extracts host names from the scenario description."""
-        hosts = re.findall(r'Host [A-Z]', scenario_text)
-        return list(set(hosts))
+        """Extracts host names from the scenario description, handling different cases and formats."""
+        hosts = re.findall(r'(?i)host [A-Z]', scenario_text)  # Case insensitive match
+        unique_hosts = list(set(hosts))  # Remove duplicates
+        
+        if len(unique_hosts) < 2:
+            st.warning("Not enough hosts detected. Using default values: Host A and Host B.")
+            return ["Host A", "Host B"]  # Fallback default hosts if not enough are found
+        
+        return unique_hosts
 
     def generate_arp_packet(self, scenario_text):
         """Generates an ARP packet dynamically based on the attack scenario."""
         hosts = self.extract_hosts_from_scenario(scenario_text)
-        if len(hosts) < 2:
-            st.error("Unable to extract enough hosts from the scenario.")
-            return
         
         source_host = hosts[0]
         destination_host = hosts[1]
