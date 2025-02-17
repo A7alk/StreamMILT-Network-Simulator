@@ -1,9 +1,8 @@
-
 import scapy.all as scapy
 import json
 import streamlit as st
 import cv2
-import pytesseract
+import easyocr  # Replace pytesseract with EasyOCR
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -11,14 +10,15 @@ class NetworkSimulator:
     def __init__(self):
         self.network = {}
         self.attack_type = None
+        self.reader = easyocr.Reader(['en'])  # Initialize EasyOCR
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
         image = cv2.imread(image_path)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        text = pytesseract.image_to_string(gray)
+        result = self.reader.readtext(gray)  # Use EasyOCR instead of Tesseract
         
-        devices = [line.strip() for line in text.split('\n') if line.strip()]
+        devices = [text[1] for text in result]  # Extract detected text
         self.network = {device: {"IP": f"192.168.1.{i+1}", "MAC": f"AA:BB:CC:DD:EE:{i+1:02d}"} for i, device in enumerate(devices)}
         return self.network
 
