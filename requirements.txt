@@ -1,6 +1,9 @@
 streamlit
 scapy
 opencv-python-headless
-pytesseract
+pytesseract==0.3.13
 networkx
 matplotlib
+requests
+pillow
+numpy
