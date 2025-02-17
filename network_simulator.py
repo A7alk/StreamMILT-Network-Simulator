@@ -64,14 +64,15 @@ class NetworkSimulator:
         st.session_state["show_arp_packet"] = True
     
     def execute_attack(self, scenario_text):
-        """Executes the selected attack type on the extracted network."""
+        """Executes the selected attack type on the extracted network and generates ARP packet immediately."""
         if not self.attack_type:
             st.error("Please select an attack type.")
             return
         
         st.success(f"Executing {self.attack_type} attack on the network...")
+        self.generate_arp_packet(scenario_text)
+        
         if self.attack_type == "Man-in-the-Middle (MiM)":
-            st.session_state["show_arp_packet"] = False
             self.mitm_attack(scenario_text)
         elif self.attack_type == "Denial of Service (DoS)":
             self.dos_attack()
@@ -81,10 +82,8 @@ class NetworkSimulator:
             st.error("Invalid attack type selected.")
     
     def mitm_attack(self, scenario_text):
-        """Simulates a Man-in-the-Middle attack and allows ARP packet generation."""
+        """Simulates a Man-in-the-Middle attack and displays ARP packet contents."""
         st.write(f"### Scenario: {scenario_text}")
-        if st.button("Generate ARP Packet Contents", key="generate_arp"):
-            self.generate_arp_packet(scenario_text)
         
         if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
             st.write("### ARP Packet Contents")
@@ -134,3 +133,4 @@ if st.button("Execute Attack", key="execute_attack"):
 if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
     st.write("### ARP Packet Contents")
     st.table(st.session_state["arp_packet"])
+
