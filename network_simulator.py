@@ -1,5 +1,6 @@
 import scapy.all as scapy
 import json
+import streamlit as st
 from PIL import Image
 import numpy as np
 import networkx as nx
@@ -7,12 +8,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import re
 import openai
-import streamlit as st
-
-# Load API key securely from Streamlit secrets
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
-client = openai.OpenAI(api_key=OPENAI_API_KEY)
-
 
 # Initialize session state if it doesn't exist
 if "arp_packet" not in st.session_state:
@@ -24,8 +19,8 @@ if "network_analyzed" not in st.session_state:
 if "analysis_result" not in st.session_state:
     st.session_state["analysis_result"] = ""
 
-# OpenAI API Key (Replace with your actual API key)
-OPENAI_API_KEY = "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"
+# Load API key securely from Streamlit secrets
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 class NetworkSimulator:
