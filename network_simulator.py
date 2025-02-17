@@ -13,8 +13,6 @@ if "arp_packet" not in st.session_state:
     st.session_state["arp_packet"] = None
 if "show_arp_packet" not in st.session_state:
     st.session_state["show_arp_packet"] = False
-if "packet_generated" not in st.session_state:
-    st.session_state["packet_generated"] = False
 
 class NetworkSimulator:
     def __init__(self):
@@ -64,7 +62,6 @@ class NetworkSimulator:
         ]
         st.session_state["arp_packet"] = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
         st.session_state["show_arp_packet"] = True
-        st.session_state["packet_generated"] = True
     
     def execute_attack(self, scenario_text):
         """Executes the selected attack type on the extracted network."""
@@ -74,6 +71,7 @@ class NetworkSimulator:
         
         st.success(f"Executing {self.attack_type} attack on the network...")
         if self.attack_type == "Man-in-the-Middle (MiM)":
+            st.session_state["show_arp_packet"] = False
             self.mitm_attack(scenario_text)
         elif self.attack_type == "Denial of Service (DoS)":
             self.dos_attack()
@@ -133,11 +131,6 @@ if st.button("Execute Attack", key="execute_attack"):
     simulator.execute_attack(scenario_text)
 
 # Ensure ARP Packet Table Stays Visible
-if st.session_state["packet_generated"] and st.session_state["arp_packet"] is not None:
+if st.session_state["show_arp_packet"] and st.session_state["arp_packet"] is not None:
     st.write("### ARP Packet Contents")
     st.table(st.session_state["arp_packet"])
-
-
-
-
-
