@@ -2,23 +2,24 @@ import scapy.all as scapy
 import json
 import streamlit as st
 import cv2
-import easyocr  # Replace pytesseract with EasyOCR
+import easyocr
 import networkx as nx
 import matplotlib.pyplot as plt
+import pandas as pd
 
 class NetworkSimulator:
     def __init__(self):
         self.network = {}
         self.attack_type = None
-        self.reader = easyocr.Reader(['en'])  # Initialize EasyOCR
+        self.reader = easyocr.Reader(['en'])
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
         image = cv2.imread(image_path)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        result = self.reader.readtext(gray)  # Use EasyOCR instead of Tesseract
+        result = self.reader.readtext(gray)
         
-        devices = [text[1] for text in result]  # Extract detected text
+        devices = [text[1] for text in result]
         self.network = {device: {"IP": f"192.168.1.{i+1}", "MAC": f"AA:BB:CC:DD:EE:{i+1:02d}"} for i, device in enumerate(devices)}
         return self.network
 
@@ -53,27 +54,24 @@ class NetworkSimulator:
         st.write(f"[+] Scenario: {scenario_text}")
         
         if st.button("Generate ARP Packet Contents"):
-            arp_packet = {
-                "ARP Operation": "Request",
-                "Source IP": "192.168.1.5",  # Assuming Host E
-                "Source MAC": "AA:BB:CC:DD:EE:05",
-                "Destination IP": "192.168.1.2",  # Assuming Host A
-                "Destination MAC": "FF:FF:FF:FF:FF:FF"
-            }
-            st.json(arp_packet)
+            arp_packet_data = [
+                ["ARP Request", "192.168.1.5", "AA:BB:CC:DD:EE:05", "192.168.1.2", "FF:FF:FF:FF:FF:FF"],
+                ["Destination MAC", "Source MAC", "MAC type (IP or ARP)", "", "ARP"]
+            ]
+            arp_packet_df = pd.DataFrame(arp_packet_data, columns=["ARP operation", "Source IP", "Source MAC", "Destination IP", "Destination MAC"])
+            
+            st.table(arp_packet_df)
         
         st.success("[+] Man-in-the-Middle attack completed.")
     
     def dos_attack(self):
         """Simulates a Denial of Service attack."""
         st.write("[+] Performing Denial of Service attack...")
-        # Add DoS logic here
         st.success("[+] Denial of Service attack completed.")
     
     def arp_poisoning(self):
         """Simulates an ARP Poisoning attack."""
         st.write("[+] Performing ARP Poisoning attack...")
-        # Add ARP poisoning logic here
         st.success("[+] ARP Poisoning attack completed.")
 
 # Streamlit App
