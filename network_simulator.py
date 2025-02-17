@@ -1,6 +1,6 @@
+
 import scapy.all as scapy
 import json
-import argparse
 import streamlit as st
 import cv2
 import pytesseract
@@ -10,47 +10,7 @@ import matplotlib.pyplot as plt
 class NetworkSimulator:
     def __init__(self):
         self.network = {}
-        self.scenarios = []
-
-    def define_network(self, config_file):
-        """Loads network topology from a JSON file."""
-        with open(config_file, 'r') as file:
-            self.network = json.load(file)
-        print("[+] Network Loaded Successfully!")
-
-    def add_scenario(self, scenario_file):
-        """Loads a new attack scenario from a JSON file."""
-        with open(scenario_file, 'r') as file:
-            scenario = json.load(file)
-        self.scenarios.append(scenario)
-        print(f"[+] Scenario '{scenario['type']}' added successfully!")
-
-    def execute_scenarios(self):
-        """Runs all defined attack scenarios."""
-        for scenario in self.scenarios:
-            if scenario["type"] == "ARP Poisoning":
-                self.arp_poison(scenario)
-
-    def arp_poison(self, scenario):
-        """Simulates ARP cache poisoning."""
-        attacker = scenario["attacker"]
-        fake_arp = scenario["fake_arp"]
-
-        print(f"[+] Executing ARP Poisoning by {attacker}...")
-        packet = scapy.ARP(op=2, psrc=fake_arp["source_IP"], hwsrc=fake_arp["source_MAC"],
-                            pdst=fake_arp["destination_IP"], hwdst=fake_arp["destination_MAC"])
-        scapy.send(packet, verbose=False)
-        print("[+] ARP Packet Sent Successfully!")
-        
-        # Log Packet Content
-        log_entry = {
-            "ARP Operation": "Reply",
-            "Source IP": fake_arp["source_IP"],
-            "Source MAC": fake_arp["source_MAC"],
-            "Destination IP": fake_arp["destination_IP"],
-            "Destination MAC": fake_arp["destination_MAC"]
-        }
-        print(json.dumps(log_entry, indent=4))
+        self.attack_type = None
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
@@ -58,10 +18,8 @@ class NetworkSimulator:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         text = pytesseract.image_to_string(gray)
         
-        # Basic processing (Assuming device names are clear and well-structured)
         devices = [line.strip() for line in text.split('\n') if line.strip()]
         self.network = {device: {"IP": f"192.168.1.{i+1}", "MAC": f"AA:BB:CC:DD:EE:{i+1:02d}"} for i, device in enumerate(devices)}
-        print("[+] Extracted Network:", json.dumps(self.network, indent=4))
         return self.network
 
     def draw_network(self):
@@ -69,32 +27,66 @@ class NetworkSimulator:
         G = nx.Graph()
         for device in self.network.keys():
             G.add_node(device)
-        for connection in self.network.get("connections", []):
-            G.add_edge(connection["from"], connection["to"])
         
         plt.figure(figsize=(6, 6))
         nx.draw(G, with_labels=True, node_color='lightblue', edge_color='gray', node_size=3000, font_size=10)
-        plt.show()
+        st.pyplot(plt)
 
-if __name__ == "__main__":
-    st.title("Stream MILT Network Simulator")
-    uploaded_file = st.file_uploader("Upload Network Diagram (Image)", type=["png", "jpg", "jpeg"])
+    def execute_attack(self):
+        """Executes the selected attack type on the extracted network."""
+        if not self.attack_type:
+            st.error("Please select an attack type.")
+            return
+        
+        st.success(f"Executing {self.attack_type} attack on the network...")
+        if self.attack_type == "Man-in-the-Middle (MiM)":
+            self.mitm_attack()
+        elif self.attack_type == "Denial of Service (DoS)":
+            self.dos_attack()
+        elif self.attack_type == "ARP Poisoning":
+            self.arp_poisoning()
+        else:
+            st.error("Invalid attack type selected.")
     
-    simulator = NetworkSimulator()
-    if uploaded_file:
-        with open("temp_image.png", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        extracted_network = simulator.process_image("temp_image.png")
-        st.json(extracted_network)
+    def mitm_attack(self):
+        """Simulates a Man-in-the-Middle attack."""
+        st.write("[+] Performing Man-in-the-Middle attack...")
+        # Add MITM logic here
+        st.success("[+] Man-in-the-Middle attack completed.")
     
-    if st.button("Draw Network"):
-        simulator.draw_network()
+    def dos_attack(self):
+        """Simulates a Denial of Service attack."""
+        st.write("[+] Performing Denial of Service attack...")
+        # Add DoS logic here
+        st.success("[+] Denial of Service attack completed.")
     
-    network_file = st.file_uploader("Upload Network Configuration JSON", type=["json"])
-    scenario_file = st.file_uploader("Upload Attack Scenario JSON", type=["json"])
+    def arp_poisoning(self):
+        """Simulates an ARP Poisoning attack."""
+        st.write("[+] Performing ARP Poisoning attack...")
+        # Add ARP poisoning logic here
+        st.success("[+] ARP Poisoning attack completed.")
+
+# Streamlit App
+st.title("Stream MILT Network Simulator")
+
+simulator = NetworkSimulator()
+
+# Image Upload Section
+uploaded_file = st.file_uploader("Upload Network Diagram (Image)", type=["png", "jpg", "jpeg"])
+if uploaded_file:
+    with open("temp_image.png", "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    extracted_network = simulator.process_image("temp_image.png")
+    st.json(extracted_network)
     
-    if network_file and scenario_file:
-        simulator.define_network(network_file.name)
-        simulator.add_scenario(scenario_file.name)
-        if st.button("Run Simulation"):
-            simulator.execute_scenarios()
+# Draw Network Section
+if st.button("Draw Network"):
+    simulator.draw_network()
+
+# Attack Selection
+attack_type = st.selectbox("Select Attack Type:", ["Man-in-the-Middle (MiM)", "Denial of Service (DoS)", "ARP Poisoning"])
+simulator.attack_type = attack_type
+
+# Execute Attack
+if st.button("Execute Attack"):
+    simulator.execute_attack()
