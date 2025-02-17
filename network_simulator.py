@@ -1,3 +1,4 @@
+
 import scapy.all as scapy
 import json
 import streamlit as st
@@ -7,6 +8,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 import re
+import openai
 
 # Initialize session state if it doesn't exist
 if "arp_packet" not in st.session_state:
@@ -17,6 +19,10 @@ if "network_analyzed" not in st.session_state:
     st.session_state["network_analyzed"] = False
 if "analysis_result" not in st.session_state:
     st.session_state["analysis_result"] = ""
+
+# OpenAI API Key (Replace with your actual API key)
+OPENAI_API_KEY = "your-api-key-here"
+openai.api_key = OPENAI_API_KEY
 
 class NetworkSimulator:
     def __init__(self):
@@ -34,14 +40,42 @@ class NetworkSimulator:
         st.session_state["network_analyzed"] = True
         return self.network
 
-    def analyze_network(self, scenario_text):
-        """Uses AI to analyze the uploaded network and respond based on the scenario."""
+    def analyze_network_with_gpt(self, scenario_text):
+        """Uses GPT-4 to analyze the uploaded network and respond based on the scenario."""
         if not st.session_state["network_analyzed"]:
             st.error("Please upload and analyze a network diagram first.")
             return
         
-        response = f"Based on the provided scenario: '{scenario_text}', AI has detected potential security risks and generated a response."
-        st.session_state["analysis_result"] = response
+        prompt = f"""
+        You are an AI network security analyst. Based on the following network attack scenario:
+        
+        {scenario_text}
+        
+        Analyze the potential impact, vulnerabilities, and mitigation strategies. Provide a technical response.
+        Additionally, generate a simulated ARP packet similar to:
+        
+        ARP operation   |   Source IP   |   Source MAC   |   Destination IP   |   Destination MAC
+        -------------------------------------------------------------------------------------------
+        ARP Request     |   X          |   Y           |   Z               |   W
+        -------------------------------------------------------------------------------------------
+        Destination MAC |   Source MAC |   MAC type (IP or ARP)
+        -------------------------------------------------------------------------------------------
+        W              |   Y          |   ARP
+        
+        Replace X, Y, Z, W with relevant values extracted from the scenario.
+        """
+        
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[{"role": "system", "content": "You are a network security expert."},
+                          {"role": "user", "content": prompt}]
+            )
+            analysis = response["choices"][0]["message"]["content"]
+        except Exception as e:
+            analysis = f"Error in AI analysis: {str(e)}"
+        
+        st.session_state["analysis_result"] = analysis
     
 # Streamlit App
 st.title("Stream MILT Network Simulator")
@@ -64,11 +98,10 @@ if st.button("Draw Network"):
 scenario_text = st.text_area("Describe the attack scenario:", "Host E uses the Man-in-the-Middle (MiM) attack to sniff the traffic between the hosts A and D. To do that, the malicious user needs to send fake ARP request packets.")
 
 # AI Analysis Execution
-if st.button("Analyze with AI", key="analyze_ai"):
-    simulator.analyze_network(scenario_text)
+if st.button("Analyze with GPT", key="analyze_gpt"):
+    simulator.analyze_network_with_gpt(scenario_text)
 
 # Display AI Analysis Result
 if st.session_state["analysis_result"]:
     st.write("### AI Analysis Result")
     st.write(st.session_state["analysis_result"])
-
