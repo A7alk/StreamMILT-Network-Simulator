@@ -20,7 +20,7 @@ if "analysis_result" not in st.session_state:
     st.session_state["analysis_result"] = ""
 
 # OpenAI API Key (Replace with your actual API key)
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 class NetworkSimulator:
