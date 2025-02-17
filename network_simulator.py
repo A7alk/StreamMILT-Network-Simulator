@@ -12,6 +12,8 @@ class NetworkSimulator:
         self.network = {}
         self.attack_type = None
         self.reader = easyocr.Reader(['en'])
+        if "arp_packet" not in st.session_state:
+            st.session_state["arp_packet"] = None
 
     def process_image(self, image_path):
         """Processes a network topology image and extracts device names and connections."""
@@ -60,10 +62,11 @@ class NetworkSimulator:
     def mitm_attack(self, scenario_text):
         """Simulates a Man-in-the-Middle attack and allows ARP packet generation."""
         st.write(f"### Scenario: {scenario_text}")
-        if st.button("Generate ARP Packet Contents"):
+        if st.button("Generate ARP Packet Contents", key="generate_arp"):
             self.generate_arp_packet()
+            st.session_state["show_arp_packet"] = True
         
-        if "arp_packet" in st.session_state:
+        if st.session_state.get("show_arp_packet", False) and st.session_state["arp_packet"] is not None:
             st.write("### ARP Packet Contents")
             st.table(st.session_state["arp_packet"])
         
@@ -104,8 +107,9 @@ simulator.attack_type = attack_type
 scenario_text = st.text_area("Describe the attack scenario:", "Host E uses the Man-in-the-Middle (MiM) attack to sniff the traffic between the hosts A and D. To do that, the malicious user needs to send fake ARP request packets.")
 
 # Execute Attack
-if st.button("Execute Attack"):
+if st.button("Execute Attack", key="execute_attack"):
     simulator.execute_attack(scenario_text)
+
 
 
 
