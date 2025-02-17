@@ -1,4 +1,4 @@
-eimport scapy.all as scapy
+import scapy.all as scapy
 import json
 import streamlit as st
 import cv2
