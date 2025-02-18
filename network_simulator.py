@@ -39,7 +39,7 @@ class NetworkSimulator:
         return self.network
 
     def analyze_network_with_gpt(self, scenario_text):
-        """Uses GPT-4 to analyze the uploaded network and respond based on the scenario."""
+        """Uses GPT-4 to analyze the uploaded network and generate an ARP packet response in a structured format."""
         if not st.session_state["network_analyzed"]:
             st.error("Please upload and analyze a network diagram first.")
             return
@@ -49,9 +49,9 @@ class NetworkSimulator:
         
         {scenario_text}
         
-        Analyze the potential impact, vulnerabilities, and mitigation strategies. Provide a technical response.
-        Additionally, generate a **complete simulated ARP packet response** for the scenario using the following format:
+        Analyze the potential impact, vulnerabilities, and mitigation strategies. Provide a structured ARP packet response formatted as follows:
         
+        ```
         ARP operation   |   Source IP   |   Source MAC   |   Destination IP   |   Destination MAC
         -------------------------------------------------------------------------------------------
         ARP Request     |   [Source_IP] |   [Source_MAC] |   [Dest_IP]       |   [Dest_MAC]
@@ -59,14 +59,15 @@ class NetworkSimulator:
         Destination MAC |   Source MAC |   MAC type (IP or ARP)
         -------------------------------------------------------------------------------------------
         [Dest_MAC]      |   [Source_MAC] |   ARP
+        ```
         
-        Replace [Source_IP], [Source_MAC], [Dest_IP], [Dest_MAC] with values based on the attack scenario.
+        Ensure the values in brackets are relevant based on the scenario. Do not provide additional text outside this format.
         """
         
         try:
             response = client.chat.completions.create(
                 model="gpt-4",
-                messages=[{"role": "system", "content": "You are a network security expert. Always generate ARP packet details based on the scenario."},
+                messages=[{"role": "system", "content": "You are a network security expert. Always generate ARP packet details in the specified format."},
                           {"role": "user", "content": prompt}]
             )
             analysis = response.choices[0].message.content
