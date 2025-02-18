@@ -50,23 +50,23 @@ class NetworkSimulator:
         {scenario_text}
         
         Analyze the potential impact, vulnerabilities, and mitigation strategies. Provide a technical response.
-        Additionally, generate a simulated ARP packet response formatted like this example:
+        Additionally, generate a **complete simulated ARP packet response** for the scenario using the following format:
         
         ARP operation   |   Source IP   |   Source MAC   |   Destination IP   |   Destination MAC
         -------------------------------------------------------------------------------------------
-        ARP Request     |   C          |   E           |   A               |   -
+        ARP Request     |   [Source_IP] |   [Source_MAC] |   [Dest_IP]       |   [Dest_MAC]
         -------------------------------------------------------------------------------------------
         Destination MAC |   Source MAC |   MAC type (IP or ARP)
         -------------------------------------------------------------------------------------------
-        A              |   E          |   ARP
+        [Dest_MAC]      |   [Source_MAC] |   ARP
         
-        Follow this format and replace values with relevant ones based on the scenario.
+        Replace [Source_IP], [Source_MAC], [Dest_IP], [Dest_MAC] with values based on the attack scenario.
         """
         
         try:
             response = client.chat.completions.create(
                 model="gpt-4",
-                messages=[{"role": "system", "content": "You are a network security expert."},
+                messages=[{"role": "system", "content": "You are a network security expert. Always generate ARP packet details based on the scenario."},
                           {"role": "user", "content": prompt}]
             )
             analysis = response.choices[0].message.content
