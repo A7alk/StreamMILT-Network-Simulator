@@ -32,7 +32,7 @@ class NetworkSimulator:
         image = Image.open(image_path).convert('L')  # Convert image to grayscale
         
         # Simple placeholder OCR using numpy (since Tesseract is unavailable)
-        detected_text = ["Host A", "Host B", "Host C", "Host D"]  # Example extracted data
+        detected_text = ["Host A", "Host B", "Host C", "Host D", "Host E"]  # Example extracted data
         
         self.network = {device: {"IP": device, "MAC": device} for device in detected_text}  # IP and MAC set as hostname
         st.session_state["network_analyzed"] = True
@@ -50,17 +50,17 @@ class NetworkSimulator:
         {scenario_text}
         
         Analyze the potential impact, vulnerabilities, and mitigation strategies. Provide a technical response.
-        Additionally, generate a simulated ARP packet similar to:
+        Additionally, generate a simulated ARP packet response formatted like this example:
         
         ARP operation   |   Source IP   |   Source MAC   |   Destination IP   |   Destination MAC
         -------------------------------------------------------------------------------------------
-        ARP Request     |   X          |   Y           |   Z               |   W
+        ARP Request     |   C          |   E           |   A               |   -
         -------------------------------------------------------------------------------------------
         Destination MAC |   Source MAC |   MAC type (IP or ARP)
         -------------------------------------------------------------------------------------------
-        W              |   Y          |   ARP
+        A              |   E          |   ARP
         
-        Replace X, Y, Z, W with relevant values extracted from the scenario.
+        Follow this format and replace values with relevant ones based on the scenario.
         """
         
         try:
